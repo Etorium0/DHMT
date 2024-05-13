@@ -1,9 +1,9 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { TransformControls } from 'three/examples/jsm/Addons.js';
-import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-import { TeapotGeometry } from 'three/examples/jsm/Addons.js';
+import * as THREE from './js/three.module.js'
+import { OrbitControls } from './js/OrbitControls.js'
+import { TransformControls } from './js/TransformControls.js'
+import { GUI } from './js/dat.gui.module.js'
+import Stats from './js/stats.module.js'
+import { TeapotGeometry } from './js/TeapotGeometry.js';
 
 // globale variables
 let camera, scene, renderer
@@ -104,20 +104,6 @@ function init() {
     mesh.castShadow = true
     mesh.receiveShadow = false
     scene.add(mesh)
-
-    // light
-    light = new THREE.PointLight(settings.light.color, 2, 100)
-    light.position.set(settings.light.posX, settings.light.posY, settings.light.posZ)
-    light.castShadow = true
-
-    // shadow
-    light.shadow.mapSize.width = 1024
-    light.shadow.mapSize.height = 1024
-    light.shadow.camera.near = 0.5
-    light.shadow.camera.far = 50
-
-    // add light to scene
-    scene.add(light)
 
     // transform controls
     obControls = new OrbitControls(camera, renderer.domElement)
