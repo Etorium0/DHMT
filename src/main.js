@@ -3,6 +3,12 @@ import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { cameraProjectionMatrix } from "three/examples/jsm/nodes/Nodes.js";
 
+let lookAt = { x: 0, y: 0, z: 0 };
+let camera;
+
+let raycaster = new THREE.Raycaster();
+let mouse = new THREE.Vector2();
+
 function getPointLight(intensity) {
   const light = new THREE.PointLight(0xffffff, intensity);
   light.castShadow = true;
@@ -48,7 +54,12 @@ function getLightByType(type) {
   }
 }
 
+function updateLookAt(camera, lookAt) {
+  camera.lookAt(new THREE.Vector3(lookAt.x, lookAt.y, lookAt.z));
+  camera.updateProjectionMatrix();
+}
 function update(scene, camera, renderer, controls, gui) {
+  updateLookAt(camera, lookAt);
   renderer.render(scene, camera);
   requestAnimationFrame(() => update(scene, camera, renderer, controls, gui));
   controls.update();
@@ -63,11 +74,11 @@ function getSphere(radius) {
 }
 
 function run() {
-  // Scene
+  //Scene
   const scene = new THREE.Scene();
 
-  // Cam
-  let camera = new THREE.PerspectiveCamera(
+  //Cam
+  camera = new THREE.PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -75,7 +86,7 @@ function run() {
   );
   camera.position.z = 6;
 
-  // Renderer
+  //Renderer
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor({ color: "rgb(120, 120, 120)" });
@@ -87,6 +98,15 @@ function run() {
   const cube = new THREE.Mesh(geometry, material);
   cube.castShadow = true;
   scene.add(cube);
+
+  const geometry2 = new THREE.BoxGeometry(1, 1, 1);
+  const material2 = new THREE.MeshPhongMaterial({
+    color: "rgb(120, 120, 120)",
+  });
+  const cube2 = new THREE.Mesh(geometry2, material2);
+  cube2.castShadow = true;
+  cube2.position.set(2, 2, 2);
+  scene.add(cube2);
 
   const planeGeometry = new THREE.PlaneGeometry(100, 100, 100, 100);
   const planeMaterial = new THREE.MeshPhongMaterial({
@@ -102,6 +122,15 @@ function run() {
   const controls = new OrbitControls(camera, renderer.domElement);
 
   const gui = new GUI();
+  let isMouseOverGui = false;
+
+  gui.domElement.addEventListener("mouseover", () => {
+    isMouseOverGui = true;
+  });
+
+  gui.domElement.addEventListener("mouseout", () => {
+    isMouseOverGui = false;
+  });
 
   let light = getPointLight(100);
   let sphere = getSphere(0.05);
@@ -111,42 +140,64 @@ function run() {
   light.add(sphere);
   scene.add(light);
 
+  //Update camera lookAt on clicking object
+  window.addEventListener(
+    "mousedown",
+    (event) => {
+      if (!isMouseOverGui) {
+        //Update mouse pos
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        //Update raycaster
+        raycaster.setFromCamera(mouse, camera);
+
+        let intersects = raycaster.intersectObjects(scene.children);
+
+        //Make the camera look at the object
+        if (intersects.length > 0) {
+          lookAt = {
+            x: intersects[0].object.position.x,
+            y: intersects[0].object.position.y,
+            z: intersects[0].object.position.z,
+          };
+          updateLookAt(camera, lookAt);
+        }
+
+        lookAtX.setValue(lookAt.x);
+        lookAtY.setValue(lookAt.y);
+        lookAtZ.setValue(lookAt.z);
+      }
+    },
+    false
+  );
+
   document.getElementById("lightType").addEventListener("change", function () {
     const type = this.value;
-    // Get current pos
+    //Get current pos
     const lightPosition = { ...light.position };
 
     scene.remove(light);
 
-    // Remove old light folder
-    lightFolder.remove(lightPositionX);
-    lightFolder.remove(lightPositionY);
-    lightFolder.remove(lightPositionZ);
-    lightFolder.remove(lightIntensity);
-    lightFolder.remove(lightColor);
+    //Remove old light folder
+    for (let i = lightFolder.__controllers.length - 1; i >= 0; i--) {
+      lightFolder.remove(lightFolder.__controllers[i]);
+    }
 
     light = getLightByType(type);
     light.position.set(lightPosition.x, lightPosition.y, lightPosition.z);
 
-    // Reset sphere color
+    //Reset sphere color
     sphere.material.color.set("rgb(255, 255, 255)");
     light.add(sphere);
     scene.add(light);
 
-    // Add new light folder
-    lightPositionX = lightFolder
-      .add(light.position, "x", -10, 10)
-      .name("Position X");
-    lightPositionY = lightFolder
-      .add(light.position, "y", -10, 10)
-      .name("Position Y");
-    lightPositionZ = lightFolder
-      .add(light.position, "z", -10, 10)
-      .name("Position Z");
-    lightIntensity = lightFolder
-      .add(light, "intensity", 0, 100)
-      .name("Intensity");
-    lightColor = lightFolder
+    //Add new light folder
+    lightFolder.add(light.position, "x", -10, 10).name("Position X");
+    lightFolder.add(light.position, "y", -10, 10).name("Position Y");
+    lightFolder.add(light.position, "z", -10, 10).name("Position Z");
+    lightFolder.add(light, "intensity", 0, 100).name("Intensity");
+    lightFolder
       .addColor({ color: "rgb(255, 255, 255)" }, "color")
       .name("Color")
       .onChange(function (color) {
@@ -154,32 +205,45 @@ function run() {
         light.color.set(rgbColor);
         sphere.material.color.set(rgbColor);
       });
+
+    if (type === "SpotLight") {
+      lightFolder
+        .add(light.shadow.mapSize, "width", 0, 4096)
+        .name("ShadowMapW");
+      lightFolder
+        .add(light.shadow.mapSize, "height", 0, 4096)
+        .name("ShadowMapH");
+      lightFolder.add(light, "penumbra", 0, 1).name("Penumbra");
+    }
+
+    if (type === "DirectionalLight") {
+      lightFolder
+        .add(light.shadow.camera, "left", -10, 10)
+        .name("ShadowCamLeft")
+        .onChange(() => {
+          light.shadow.camera.updateProjectionMatrix();
+        });
+      lightFolder
+        .add(light.shadow.camera, "right", -10, 10)
+        .name("ShadowCamRight")
+        .onChange(() => {
+          light.shadow.camera.updateProjectionMatrix();
+        });
+      lightFolder
+        .add(light.shadow.camera, "top", -10, 10)
+        .name("ShadowCamTop")
+        .onChange(() => {
+          light.shadow.camera.updateProjectionMatrix();
+        });
+      lightFolder
+        .add(light.shadow.camera, "bottom", -10, 0)
+        .name("ShadowCamBottom")
+        .onChange(() => {
+          light.shadow.camera.updateProjectionMatrix();
+        });
+    }
   });
-
-  // Geometry folder
-  const geometryFolder = gui.addFolder("Mesh Geometry");
-  geometryFolder.open();
-
-  // Rotation subfolder
-  const rotationFolder = geometryFolder.addFolder("Rotation");
-  rotationFolder
-    .add(cube.rotation, "x", -Math.PI, Math.PI)
-    .name("Rotate X Axis");
-  rotationFolder
-    .add(cube.rotation, "y", -Math.PI, Math.PI)
-    .name("Rotate Y Axis");
-  rotationFolder
-    .add(cube.rotation, "z", -Math.PI, Math.PI)
-    .name("Rotate Z Axis");
-  rotationFolder.open();
-
-  // Scale subfolder
-  const scaleFolder = geometryFolder.addFolder("Scale");
-  scaleFolder.add(cube.scale, "x", 0, 3).name("Scale X Axis");
-  scaleFolder.add(cube.scale, "y", 0, 3).name("Scale Y Axis");
-  scaleFolder.add(cube.scale, "z", 0, 3).name("Scale Z Axis");
-  scaleFolder.open();
-  // Camera folder
+  //Camera folder
   const cameraFolder = gui.addFolder("Camera");
   cameraFolder.add(camera.position, "x", -10, 10).name("Position X");
   cameraFolder.add(camera.position, "y", -10, 10).name("Position Y");
@@ -192,7 +256,33 @@ function run() {
     });
   cameraFolder.open();
 
-  // Light folder
+  //LookAt folder
+  const lookAtFolder = gui.addFolder("LookAt");
+  lookAt = { x: 0, y: 0, z: 0 };
+  let lookAtX = lookAtFolder
+    .add(lookAt, "x", -10, 10)
+    .name("LookAt X")
+    .onChange(() => {
+      updateLookAt(camera, lookAt);
+    })
+    .listen();
+  let lookAtY = lookAtFolder
+    .add(lookAt, "y", -10, 10)
+    .name("LookAt Y")
+    .onChange(() => {
+      updateLookAt(camera, lookAt);
+    })
+    .listen();
+  let lookAtZ = lookAtFolder
+    .add(lookAt, "z", -10, 10)
+    .name("LookAt Z")
+    .onChange(() => {
+      updateLookAt(camera, lookAt);
+    })
+    .listen();
+  lookAtFolder.open();
+
+  //Light folder
   const lightFolder = gui.addFolder("Light");
   let lightPositionX = lightFolder
     .add(light.position, "x", -10, 10)
