@@ -1,9 +1,11 @@
 import * as THREE from './js/three.module.js'
-import { OrbitControls } from './js/OrbitControls.js'
-import { TransformControls } from './js/TransformControls.js'
-import { GUI } from './js/dat.gui.module.js'
-import Stats from './js/stats.module.js'
-import { TeapotGeometry } from './js/TeapotGeometry.js';
+import { OrbitControls } from 'three/examples/jsm/Addons.js'
+import { TransformControls } from 'three/examples/jsm/Addons.js'
+import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
+import Stats from 'three/examples/jsm/libs/stats.module.js'
+import { TeapotGeometry  } from 'three/examples/jsm/Addons.js'
+import { GLTFLoader } from 'three/examples/jsm/Addons.js'
+import { TGALoader } from 'three/examples/jsm/Addons.js'
 
 // globale variables
 let camera, scene, renderer
@@ -249,6 +251,8 @@ function initGUI() {
         }
         mesh.material = material
     })
+    
+
 
     // affine
     let f = gui.addFolder('affine transformation')
@@ -262,3 +266,20 @@ function initGUI() {
         mesh.position.set(0, 0.5, 0)
     })
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const textureInput = document.getElementById('textureInput');
+    textureInput.addEventListener('change', handleTextureUpload);
+});
+
+function handleTextureUpload(event) {
+    const file = event.target.files[0];
+    const loader = new THREE.TextureLoader();
+    loader.load(URL.createObjectURL(file), (texture) => {
+      material.map = texture;
+      material.needsUpdate = true;
+    });
+    mesh.material = material
+}
+
+  
