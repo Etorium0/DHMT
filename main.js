@@ -208,21 +208,21 @@ function initGUI() {
 
     g.add(settings.geometry, 'shape', ['cube', 'sphere', 'cone', 'cylinder', 'dodecahedron', 'tetrahedron', 'torus', 'torusknot', 'teapot']).onChange(() => {
         if (settings.geometry.shape === 'cube') {
-            geometry = new THREE.BoxBufferGeometry(1, 1, 1)
+            geometry = new THREE.BoxGeometry(1, 1, 1)
         } else if (settings.geometry.shape === 'sphere') {
-            geometry = new THREE.SphereBufferGeometry(1, 32, 32)
+            geometry = new THREE.SphereGeometry(1, 32, 32)
         } else if (settings.geometry.shape === 'cone') {
-            geometry = new THREE.ConeBufferGeometry(1, 2, 32)
+            geometry = new THREE.ConeGeometry(1, 2, 32)
         } else if (settings.geometry.shape === 'cylinder') {
-            geometry = new THREE.CylinderBufferGeometry(1, 1, 1, 32)
+            geometry = new THREE.CylinderGeometry(1, 1, 1, 32)
         } else if (settings.geometry.shape === 'dodecahedron') {
-            geometry = new THREE.DodecahedronBufferGeometry(1, 0)
+            geometry = new THREE.DodecahedronGeometry(1, 0)
         } else if (settings.geometry.shape === 'tetrahedron') {
-            geometry = new THREE.TetrahedronBufferGeometry(1, 0)
+            geometry = new THREE.TetrahedronGeometry(1, 0)
         } else if (settings.geometry.shape === 'torus') {
-            geometry = new THREE.TorusBufferGeometry(1, 0.3, 32, 32)
+            geometry = new THREE.TorusGeometry(1, 0.3, 32, 32)
         } else if (settings.geometry.shape === 'torusknot') {
-            geometry = new THREE.TorusKnotBufferGeometry(1, 0.1, 32, 32)
+            geometry = new THREE.TorusKnotGeometry(1, 0.1, 32, 32)
         } else if (settings.geometry.shape === 'teapot') {
             geometry = new TeapotGeometry(0.5)
         }
