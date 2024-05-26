@@ -13,8 +13,8 @@ var objList = []
 var lightList = []
 var lightHelper = []
 // globale variables
-let camera, scene, renderer
-let floor, geometry, material, mesh, floorMesh, lightObj, axes
+let camera, scene, renderer, loader
+let floor, geometry, material, mesh, lightObj, axes
 let gui
 let stats
 let textureLoader = new THREE.TextureLoader()
@@ -23,8 +23,10 @@ let textureLoader = new THREE.TextureLoader()
 let obControls, afControls
 let settings = {
     common: {
-        showaxes: true,
+        showaxes: false,
         background: 'rgb(80,80,80)',
+        showHelper: true,
+        
         floorLock: true
     },
     geometry: {
@@ -33,9 +35,10 @@ let settings = {
         material: 'basic',
         wireframe: false,
         color: 0x999999,
+        opacity: 1
     },
     light: {
-        type: 'point',
+        type: "Point Light",
         enable: true,
         shadow: true,
         intensity: 1,
@@ -57,6 +60,7 @@ let settings = {
         lookX: 0,
         lookY: 0,
         lookZ: 0,
+        lookAtObj: false,
     },
     animation: {
         play: false,
@@ -83,7 +87,7 @@ var id = 1
 $(".geometry").click(function () {
     var geometryName = $(this).text()
     var geometry
-    var material = new THREE.MeshBasicMaterial({ color: 'white', side: THREE.DoubleSide, name: 'basic' })
+    var material = new THREE.MeshBasicMaterial({transparent: true, color: 'white', side: THREE.DoubleSide, name: 'basic' })
     console.log(geometryName)
         switch (geometryName) {
             case "Box":
@@ -121,36 +125,30 @@ $(".light").click(function () {
     var lightName = $(this).text()
     var val;
     console.log(lightName)
-        switch (lightName) {
-            case "Point Light":
-                val = getPointLight(100);   
-                break;
-            case "Spot Light":
-                val = getSpotLight(100);
-                break;
-            case "Directional Light":
-                val = getDirectionalLight(100);
-                break;
-            case "Ambient Light":
-                val = getAmbientLight(100);
-                val.helper.name = 'ambient'
-                break;
-        }
-        val.name = id++ 
-        lightList[lightList.length] = val
-        lightHelper[lightHelper.length] = val.helper
+    val = getLightByType(lightName)
+    val.name = id++ 
+    lightList[lightList.length] = val
+    lightHelper[lightHelper.length] = val.helper
 
-        scene.add(val.light)
-        if (val.helper.name == 'ambient')
+    scene.add(val.light)
+
+    if (val.type == 'Spot Light' || val.type == 'Directional Light')
+    {
+        scene.add(val.light.target)
+    }
+
+    if(settings.common.showHelper)
+    {
+        if (val.type == 'Ambient Light')
         {
             val.light.add(val.helper)
         }
         else
             scene.add(val.helper)
-
-        val.light.name = val.name
-        val.helper.name = val.name
-        console.log(lightList[lightList.length-1].name)
+    }
+    val.light.name = val.name
+    val.helper.name = val.name
+    console.log(lightList[lightList.length-1].name)
 }
 )
 init()
@@ -171,7 +169,9 @@ document.getElementById("canvas").addEventListener("mousemove", function(event)
     raycaster.setFromCamera(mouse, camera)
     
     if (isMouseDown == false) {
-        var temp = objList.concat(lightHelper)
+        var temp = objList
+        if(settings.common.showHelper)
+            temp=temp.concat(lightHelper)
         var intersects = raycaster.intersectObjects(temp)
         if (box != null)
             scene.remove(box)
@@ -183,6 +183,7 @@ document.getElementById("canvas").addEventListener("mousemove", function(event)
             {
                 box = new THREE.BoxHelper( intersects[0].object, 0xffff00 )
                 scene.add( box )
+                
             }
                 return
         } 
@@ -208,18 +209,22 @@ document.getElementById("canvas").addEventListener("mousedown", function(event)
         raycaster.setFromCamera(mouse, camera)
         befMesh = mesh
         befLight = lightObj
-        var temp = objList.concat(lightHelper)
+        var temp = objList
+        if(settings.common.showHelper)
+            temp=temp.concat(lightHelper)
         var intersects = raycaster.intersectObjects(temp)
         if (intersects.length > 0 && intersects[0].object.name != 'inactive') {
             if (objList.includes(intersects[0].object))
             {
                 mesh = intersects[0].object
+                
                 lightObj = null
             }
             else
             {
-                console.log(lightHelper.length)
+                
                 var index = lightHelper.indexOf(intersects[0].object.parent)
+                
                 if (index == -1)
                 {
                     index = lightHelper.indexOf(intersects[0].object)
@@ -234,40 +239,46 @@ document.getElementById("canvas").addEventListener("mousedown", function(event)
     if (mesh == null && g!=null)
     { gui.removeFolder(g)
         g = null}
+    if (lightObj == null && l!=null)
+    { gui.removeFolder(l)
+        l = null}
     
-    
-})
-
-document.getElementById("canvas").addEventListener("mouseup", function(event)
-{
-    isMouseDown = false
-    if (crnbox != null)
-        scene.remove(crnbox)
-    crnbox = null
-
     if (mesh != null)
         {
-            crnbox = new THREE.BoxHelper( mesh, 0xffff00 )
-            scene.add( crnbox )
+            
             if (befMesh != mesh)
                 {
+                    
                     initGeometryGUI()
+                    
                     afControls.attach(mesh)
                 }
             
         }
     if (lightObj != null)
         {
-            console.log("LA2")
-            crnbox = new THREE.BoxHelper( lightObj.helper, 0xffff00 )
-            scene.add( crnbox )
+
             if (befLight != lightObj)
                 {
-                    initLightGUI()
+                    initLightGUI(lightObj.type)
+                    initLightTypeGUI()
                     afControls.attach(lightObj.light)
                 }
             
         }
+})
+
+document.getElementById("canvas").addEventListener("mouseup", function(event)
+{
+    isMouseDown = false    
+    if (settings.camera.lookAtObj) {
+        if(mesh!=null)
+            {
+                settings.camera.lookX = mesh.position.x
+                settings.camera.lookY = mesh.position.y
+                settings.camera.lookZ = mesh.position.z
+            }
+    }
 })
 
 document.getElementById("canvas").addEventListener("dblclick", function(event)
@@ -276,26 +287,32 @@ document.getElementById("canvas").addEventListener("dblclick", function(event)
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
     raycaster.setFromCamera(mouse, camera)
-    var intersects = raycaster.intersectObjects(objList)
-    if (intersects.length <= 0) {
+    var temp = objList.concat(lightHelper)
+    var intersects = raycaster.intersectObjects(temp)
+    if (intersects.length <= 0 || (intersects.length > 0 && intersects[0].object.name == 'inactive')) {
             
         if (g!=null)
                 gui.removeFolder(g)
         g = null
-         mesh = null
-        if (crnbox != null)
-            scene.remove(crnbox)
-        crnbox = null
+        if (l!=null)
+                gui.removeFolder(l)
+        l = null
+        mesh = null
+        lightObj = null
         afControls.detach()
     } 
 })
-
+//CAMERA
+function updateLookAt() {
+    camera.lookAt(new THREE.Vector3(settings.camera.lookX, settings.camera.lookY, settings.camera.lookZ));
+    camera.updateProjectionMatrix();
+  }
 //LIGHT
 function getPointLight(intensity) {
     const light = new THREE.PointLight(0xffffff, intensity);
     light.castShadow = true;
     const helper = new THREE.PointLightHelper(light);
-    return {light: light, helper: helper, name: ''};
+    return {light: light, helper: helper, name: '', type: 'Point Light'};
   }
   
   function getSpotLight(intensity) {
@@ -307,7 +324,7 @@ function getPointLight(intensity) {
     light.penumbra = 0.1;
     
     const helper = new THREE.SpotLightHelper(light);
-    return {light: light, helper: helper, name: ''};
+    return {light: light, helper: helper, name: '', type: 'Spot Light'};
   }
   
   function getDirectionalLight(intensity) {
@@ -319,7 +336,7 @@ function getPointLight(intensity) {
     light.shadow.camera.top = 5;
     
     const helper = new THREE.DirectionalLightHelper(light);
-    return {light: light, helper: helper, name: ''};
+    return {light: light, helper: helper, name: '', type: 'Directional Light'};
   }
   
   function getAmbientLight(intensity) {
@@ -327,16 +344,40 @@ function getPointLight(intensity) {
     var geometry = new THREE.SphereGeometry(0.2, 10, 10)
     var material = new THREE.MeshBasicMaterial({ color: light.color, side: THREE.DoubleSide, name: 'basic' })
     const helper = new THREE.Mesh(geometry, material)
-    return {light: light, helper: helper, name: ''};
+    return {light: light, helper: helper, name: '', type: 'Ambient Light'};
   }
-  function updateLight(lightObj)
+
+  function getLightByType(type) {
+    switch (type) {
+      case "Point Light":
+        return getPointLight(100);
+      case "Spot Light":
+        return getSpotLight(100);
+      case "Directional Light":
+        return getDirectionalLight(100);
+      case "Ambient Light":
+        return getAmbientLight(100);
+    }
+  }
+
+  function updateLight()
   {
     if (lightObj == null) return
-    try{lightObj.helper.update();}
-    catch(exeption)
+    if (lightObj.type == 'Ambient Light')
     {
-        lightObj.helper.material.color.set(lightObj.light.color.getHex())
-    } 
+            lightObj.helper.material.color.set(lightObj.light.color.getHex())
+            return
+    }
+        
+    else if (lightObj.type == 'Spot Light' || lightObj.type == 'Directional Light')
+    {   
+            console.log("df")
+            lightObj.light.target.updateMatrixWorld();
+    }
+    lightObj.helper.update()
+    
+        
+    
   }
 
 //INIT
@@ -358,13 +399,16 @@ function init() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     document.body.appendChild(renderer.domElement)
     renderer.domElement.id = "canvas"
+
+    //loader
+    loader = new THREE.TextureLoader();
+
     // axes
-    axes = new THREE.AxesHelper(5)
-    scene.add(axes)
+    axes = new THREE.AxesHelper(100)
 
     // floor
     geometry = new THREE.PlaneGeometry (10, 10, 10, 10)
-    let floorMat = new THREE.MeshPhongMaterial({ color: 0x222222, side: THREE.DoubleSide, name: 'phong' })
+    let floorMat = new THREE.MeshPhongMaterial({transparent: true, color: 0x222222, side: THREE.DoubleSide, name: 'phong' })
 
     // floor mesh
     floor = new THREE.Mesh(geometry, floorMat)
@@ -392,7 +436,7 @@ function init() {
     afControls.addEventListener('change', () => {
         // console.log(afControls.object.position)
         renderer.render(scene, camera)
-        updateLight(lightObj)
+        updateLight()
     })
     afControls.addEventListener('dragging-changed', (event) => {
         if (event.value) {
@@ -427,6 +471,7 @@ function onWindowResize() {
 function animate() {
     requestAnimationFrame(animate)
     gui.updateDisplay();
+    updateLookAt();
     if (settings.animation.play) {
         switch (settings.animation.type) {
             case 'go up and down':
@@ -455,17 +500,96 @@ function animate() {
 }
 
 var l = null
-function initLightGUI() 
+
+function initLightTypeGUI()
 {
+    var light = lightObj.light
+    settings.light.type = lightObj.type
+    var matCon = l.add(settings.light, 'type', ['Point Light', 'Spot Light', 'Ambient Light', 'Directional Light'])
+    matCon.setValue(settings.light.type)
+    matCon.onChange(() => {
+        const index = lightList.indexOf(lightObj)
+        const lightPosition = { ...light.position };
+        const name = lightObj.name
+        
+        afControls.detach()
+        scene.remove(light);
+        scene.remove(lightObj.helper);
+            
+        lightObj = getLightByType(settings.light.type)
+        lightList[index] = lightObj
+        lightHelper[index] = lightObj.helper
+        lightObj.name = name
+        lightObj.light.name = name
+        lightObj.helper.name = name
+        lightObj.light.position.set(lightPosition.x, lightPosition.y, lightPosition.z);
+
+        scene.add(lightObj.light)
+        if (lightObj.type == 'Spot Light' || lightObj.type == 'Directional Light')
+        {
+            scene.add(lightObj.light.target)
+        }
+
+        if (lightObj.type == 'Ambient Light')
+        {
+            lightObj.light.add(lightObj.helper)
+        }
+        else
+            scene.add(lightObj.helper)
+        
+    
+        afControls.attach(lightObj.light)
+        initLightGUI(lightObj.type)
+        initLightTypeGUI()
+    })
+}
+function initLightGUI(type) 
+{
+    var light = lightObj.light
     if (l!=null)
         gui.removeFolder(l)
 
     // geometry
     l = gui.addFolder('light')
 
-    l.addColor(new ColorGUIHelper(lightObj.light, 'color'), 'value').name('Light color').onChange(() => {
-        updateLight(lightObj)
+    makeXYZGUI(gui, light.position, l, -10, 10, "Position")
+
+    l.add(light, "intensity", 0, 100).name("Intensity");
+
+    if (type === "Spot Light") {
+        l.add(light, "penumbra", 0, 1).name("Penumbra");
+        makeXYZGUI(gui, light.target.position, l, -20, 20, "Target", updateLight)
+        l.add(light, "distance", 0, 40, 0.1).name("Distance").onChange(() => {
+            updateLight()
+          });
+        l.add(new DegRadHelper(light, 'angle'), 'value', 0, 90).name("Angle").onChange(() => {
+            updateLight()
+          });
+    }
+    else if (type === "Point Light")
+        {
+            l.add(light, "distance", 0, 40, 0.1).name("Distance").onChange(() => {
+                updateLight()
+              });
+        }
+    else if (type === "Directional Light") {
+        
+        l
+        .add(light.shadow.camera, "bottom", -10, 0)
+        .name("ShadowCamBottom")
+        .onChange(() => {
+          light.shadow.camera.updateProjectionMatrix();
+        });
+
+        makeXYZGUI(gui, light.target.position, l, -20, 20, "Target", updateLight)
+    }
+    l.addColor(new ColorGUIHelper(light, 'color'), 'value').name('Light color').onChange(() => {
+        updateLight()
     })
+
+    var obj = { Remove:function(){ removeLight() }};
+
+    l.add(obj,'Remove');
 
     l.open()
 }
@@ -478,9 +602,8 @@ function initGeometryGUI()
 
     // geometry
     g = gui.addFolder('geometry')
-    g.add(mesh.scale, "x", 0.1, 10).name('Scale X')
-    g.add(mesh.scale, "y", 0.1, 10).name('Scale Y')
-    g.add(mesh.scale, "z", 0.1, 10).name('Scale Z')
+
+    makeXYZGUI(gui, mesh.scale, g, 0.1, 10, "Scale")
 
     g.add(new DegRadHelper(mesh.rotation, 'x'), 'value', -180, 180).name('Rotate X')
     g.add(new DegRadHelper(mesh.rotation, 'y'), 'value', -180, 180).name('Rotate Y')
@@ -489,26 +612,45 @@ function initGeometryGUI()
     
     settings.geometry.color = mesh.material.color.getHex()
     settings.geometry.material = mesh.material.name
-    var matCon = g.add(settings.geometry, 'material', ['basic', 'lambert', 'phong', 'toon']).onChange(() => {
+    settings.geometry.opacity = mesh.material.opacity
+
+    var matCon = g.add(settings.geometry, 'material', ['basic', 'lambert', 'phong', 'toon'])
+    matCon.setValue(settings.geometry.material)    
+    matCon.onChange(() => {
         if (settings.geometry.material == 'basic') {
-            material = new THREE.MeshBasicMaterial({ color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
+            material = new THREE.MeshBasicMaterial({opacity:settings.geometry.opacity, transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
             
         } else if (settings.geometry.material == 'lambert') {
-            material = new THREE.MeshLambertMaterial({ color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
+            material = new THREE.MeshLambertMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
         } else if (settings.geometry.material == 'phong') {
-            material = new THREE.MeshPhongMaterial({ color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
+            material = new THREE.MeshPhongMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
         } else if (settings.geometry.material == 'toon') {
-            material = new THREE.MeshToonMaterial({ color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
+            const threeTone = textureLoader.load( '/assets/texture/gradientMap/threeTone.jpg' );
+			threeTone.minFilter = THREE.NearestFilter;
+			threeTone.magFilter = THREE.NearestFilter;
+            material = new THREE.MeshToonMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material, gradientMap: threeTone })
         } 
         mesh.material = material
     })
-
-    matCon.setValue(settings.geometry.material)    
     g.addColor(settings.geometry, 'color').onChange(() => {
         mesh.material.color.set(settings.geometry.color)
   
     })
 
+    
+    g.add(settings.geometry, 'opacity', 0, 1, 0.1).name('Opacity').onChange(()=>{
+        var a = settings.geometry.opacity
+        mesh.material.opacity = a
+        
+    })
+
+    var obj = { Remove:function(){ removeObject() }};
+    if (mesh.name != floor.name)
+        {
+            
+            g.add(obj,'Remove');
+        }
+    
     g.open()
 }
 function initGUI() {
@@ -522,11 +664,43 @@ function initGUI() {
         scene.background = new THREE.Color(settings.common.background)
     })
 
+    
+
     h.add(settings.common, 'showaxes').onChange(() => {
         if (settings.common.showaxes) {
             scene.add(axes)
         } else {
             scene.remove(axes)
+        }
+    })
+
+    h.add(settings.common, 'showHelper').onChange(() => {
+        if (settings.common.showHelper) {
+            for(let i=0; i<lightHelper.length; i++)
+            {
+                if(lightList[i].type == 'Ambient Light')
+                    lightList[i].light.add(lightHelper[i])
+                else
+                    scene.add(lightHelper[i])
+            }    
+            if(lightObj!=null)
+                {
+                    afControls.attach(lightObj.light)
+                }
+        } else {
+            for(let i=0; i<lightHelper.length; i++)
+                {
+                 console.log(lightHelper[i].name)
+                 if(lightList[i].type == 'Ambient Light')
+                    lightList[i].light.remove(lightHelper[i])
+                 else
+                    scene.remove(lightHelper[i])
+                }
+            if(lightObj!=null)
+            {
+                afControls.detach()
+            }
+
         }
     })
 
@@ -538,9 +712,6 @@ function initGUI() {
                         gui.removeFolder(g)
                 g = null
                 mesh = null
-                if (crnbox != null)
-                    scene.remove(crnbox)
-                crnbox = null
                 afControls.detach()
             } 
             floor.name = 'inactive'
@@ -550,4 +721,106 @@ function initGUI() {
     })
 
     h.open()
+
+    const cameraFolder = gui.addFolder("Camera");
+    cameraFolder.add(camera.position, "x", -10, 10).name("Position X");
+    cameraFolder.add(camera.position, "y", -10, 10).name("Position Y");
+    cameraFolder.add(camera.position, "z", 0, 10).name("Position Z");
+    cameraFolder
+    .add(camera, "fov", 1, 180)
+    .name("Field of View")
+    .onChange(() => {
+      camera.updateProjectionMatrix();
+    });
+    
+    //LookAt folder
+    const lookAtFolder = gui.addFolder("LookAt");
+    lookAtFolder.add(settings.camera, 'lookAtObj').onChange(() => {
+        if (settings.camera.lookAtObj) {
+            if(mesh!=null)
+                {
+                    settings.camera.lookX = mesh.position.x
+                    settings.camera.lookY = mesh.position.y
+                    settings.camera.lookZ = mesh.position.z
+                }
+        }
+    })
+    lookAtFolder
+    .add(settings.camera, "lookX", -10, 10)
+    .name("LookAt X")
+    .onChange(() => {
+      updateLookAt();
+      settings.camera.lookAtObj = false
+    })
+    .listen();
+    lookAtFolder
+    .add(settings.camera, "lookY", -10, 10)
+    .name("LookAt Y")
+    .onChange(() => {
+      updateLookAt();
+      settings.camera.lookAtObj = false
+    })
+    .listen();
+    lookAtFolder
+    .add(settings.camera, "lookZ", -10, 10)
+    .name("LookAt Z")
+    .onChange(() => {
+      updateLookAt();
+      settings.camera.lookAtObj = false
+    })
+    .listen();
 }
+
+function makeXYZGUI(gui, vector3, guiFolder, min, max, name, funct = "none") {
+    if (funct == "none")
+        {
+        guiFolder.add(vector3, 'x', min, max).name(name + " X")
+        guiFolder.add(vector3, 'y', min, max).name(name + " Y")
+        guiFolder.add(vector3, 'z', min, max).name(name + " Z")
+        }
+    else
+    {
+        guiFolder.add(vector3, 'x', min, max).name(name + " X").onChange(funct)
+        guiFolder.add(vector3, 'y', min, max).name(name + " Y").onChange(funct)
+        guiFolder.add(vector3, 'z', min, max).name(name + " Z").onChange(funct)
+    }
+    
+  }
+
+function removeObject()
+{
+    var index = objList.indexOf(mesh)
+    if (index == -1) return
+    scene.remove(mesh)
+    objList = removeFromArray(index, objList)
+    mesh = null
+    if (mesh == null && g!=null)
+    { 
+        gui.removeFolder(g)
+        g = null
+    }
+    afControls.detach()
+}
+function removeLight()
+{
+    var index = lightList.indexOf(lightObj)
+    if (index == -1) return
+    scene.remove(lightObj.light)
+    scene.remove(lightObj.helper)
+    lightList = removeFromArray(index, lightList)
+    lightHelper = removeFromArray(index, lightHelper)
+    lightObj = null
+    if (lightObj == null && l!=null)
+    { 
+        gui.removeFolder(l)
+        l = null
+    }
+    afControls.detach()
+}
+
+function removeFromArray(index, oldArr)
+{
+    const newArr = oldArr.slice(0, index).concat(oldArr.slice(index+1))
+    return newArr
+}
+
