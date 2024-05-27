@@ -1,11 +1,11 @@
-import * as THREE from './js/three.module.js'
-import { OrbitControls } from 'three/examples/jsm/Addons.js'
-import { TransformControls } from 'three/examples/jsm/Addons.js'
-import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
-import Stats from 'three/examples/jsm/libs/stats.module.js'
-import { TeapotGeometry  } from 'three/examples/jsm/Addons.js'
-import { GLTFLoader } from 'three/examples/jsm/Addons.js'
-import { TGALoader } from 'three/examples/jsm/Addons.js'
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/Addons.js"
+import { TGALoader } from "three/examples/jsm/Addons.js"
+import { GUI } from "dat.gui";
+import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { TransformControls } from "three/examples/jsm/Addons.js"
+import Stats from "three/examples/jsm/libs/stats.module.js"
+import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry.js"
 
 // globale variables
 let camera, scene, renderer
@@ -87,7 +87,7 @@ function init() {
     scene.add(axes)
 
     // floor
-    geometry = new THREE.PlaneBufferGeometry(10, 10, 10, 10)
+    geometry = new THREE.PlaneGeometry (10, 10, 10, 10)
     let floorMat = new THREE.MeshPhongMaterial({ color: 0x222222, side: THREE.DoubleSide })
     floor = new THREE.Mesh(geometry, floorMat)
 
@@ -99,7 +99,7 @@ function init() {
     scene.add(floorMesh)
 
     // object
-    geometry = new THREE.BoxBufferGeometry(1, 1, 1)
+    geometry = new THREE.BoxGeometry(1, 1, 1)
     material = new THREE.MeshBasicMaterial({ color: settings.geometry.color, side: THREE.DoubleSide })
     mesh = new THREE.Mesh(geometry, material)
     mesh.position.set(0, 0.5, 0)
@@ -135,7 +135,11 @@ function init() {
     // stats
     stats = new Stats()
     stats.showPanel(0)
-    document.body.appendChild(stats.dom)
+    
+    
+    document.body.appendChild(stats.domElement)
+    stats.domElement.id = "STAT";
+
 
     window.addEventListener('resize', onWindowResize, false)
 }
@@ -180,7 +184,7 @@ function animate() {
 function initGUI() {
     // gui  
     gui = new GUI()
-
+    gui.domElement.id = "GUI";
     // common
     let h = gui.addFolder('common')
 
@@ -206,21 +210,21 @@ function initGUI() {
 
     g.add(settings.geometry, 'shape', ['cube', 'sphere', 'cone', 'cylinder', 'dodecahedron', 'tetrahedron', 'torus', 'torusknot', 'teapot']).onChange(() => {
         if (settings.geometry.shape === 'cube') {
-            geometry = new THREE.BoxBufferGeometry(1, 1, 1)
+            geometry = new THREE.BoxGeometry(1, 1, 1)
         } else if (settings.geometry.shape === 'sphere') {
-            geometry = new THREE.SphereBufferGeometry(1, 32, 32)
+            geometry = new THREE.SphereGeometry(1, 32, 32)
         } else if (settings.geometry.shape === 'cone') {
-            geometry = new THREE.ConeBufferGeometry(1, 2, 32)
+            geometry = new THREE.ConeGeometry(1, 2, 32)
         } else if (settings.geometry.shape === 'cylinder') {
-            geometry = new THREE.CylinderBufferGeometry(1, 1, 1, 32)
+            geometry = new THREE.CylinderGeometry(1, 1, 1, 32)
         } else if (settings.geometry.shape === 'dodecahedron') {
-            geometry = new THREE.DodecahedronBufferGeometry(1, 0)
+            geometry = new THREE.DodecahedronGeometry(1, 0)
         } else if (settings.geometry.shape === 'tetrahedron') {
-            geometry = new THREE.TetrahedronBufferGeometry(1, 0)
+            geometry = new THREE.TetrahedronGeometry(1, 0)
         } else if (settings.geometry.shape === 'torus') {
-            geometry = new THREE.TorusBufferGeometry(1, 0.3, 32, 32)
+            geometry = new THREE.TorusGeometry(1, 0.3, 32, 32)
         } else if (settings.geometry.shape === 'torusknot') {
-            geometry = new THREE.TorusKnotBufferGeometry(1, 0.1, 32, 32)
+            geometry = new THREE.TorusKnotGeometry(1, 0.1, 32, 32)
         } else if (settings.geometry.shape === 'teapot') {
             geometry = new TeapotGeometry(0.5)
         }
