@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/Addons.js"
+import { TGALoader } from "three/examples/jsm/Addons.js"
 import { GUI } from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { TransformControls } from "three/examples/jsm/Addons.js"
@@ -253,6 +255,8 @@ function initGUI() {
         }
         mesh.material = material
     })
+    
+
 
     // affine
     let f = gui.addFolder('affine transformation')
@@ -266,3 +270,20 @@ function initGUI() {
         mesh.position.set(0, 0.5, 0)
     })
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const textureInput = document.getElementById('textureInput');
+    textureInput.addEventListener('change', handleTextureUpload);
+});
+
+function handleTextureUpload(event) {
+    const file = event.target.files[0];
+    const loader = new THREE.TextureLoader();
+    loader.load(URL.createObjectURL(file), (texture) => {
+      material.map = texture;
+      material.needsUpdate = true;
+    });
+    mesh.material = material
+}
+
+  
