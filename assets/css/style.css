@@ -115,3 +115,15 @@ canvas {
     right: 10px !important;
 
 }
+.thumbnail
+{
+    height: 70px;
+    min-width: 70px;
+    padding: 5px
+}
+.textureThumb
+{
+    object-fit: cover;
+    height: 100%;
+    width: 100%
+}

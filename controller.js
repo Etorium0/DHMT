@@ -6,14 +6,12 @@ import { OrbitControls } from "three/examples/jsm/Addons.js"
 import { TransformControls } from "three/examples/jsm/Addons.js"
 import Stats from "three/examples/jsm/libs/stats.module.js"
 import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry.js"
-import { mod } from "three/examples/jsm/nodes/Nodes.js"
-import { update } from "three/examples/jsm/libs/tween.module.js"
 
 var objList = []
 var lightList = []
 var lightHelper = []
 // globale variables
-let camera, scene, renderer, loader
+let camera, scene, renderer
 let floor, geometry, material, mesh, lightObj, axes
 let gui
 let stats
@@ -115,6 +113,7 @@ $(".geometry").click(function () {
         var mesh = new THREE.Mesh(geometry, material)
         mesh.name = id++
         mesh.castShadow = true // Shadow (đổ bóng).
+        mesh.receiveShadow = true
         objList[objList.length] = mesh
         scene.add(mesh)
 
@@ -400,8 +399,6 @@ function init() {
     document.body.appendChild(renderer.domElement)
     renderer.domElement.id = "canvas"
 
-    //loader
-    loader = new THREE.TextureLoader();
 
     // axes
     axes = new THREE.AxesHelper(100)
@@ -595,8 +592,10 @@ function initLightGUI(type)
 }
 
 var g = null
+var textureGui = null
 function initGeometryGUI() 
 {
+    textureGui = null
     if (g!=null)
         gui.removeFolder(g)
 
@@ -617,20 +616,38 @@ function initGeometryGUI()
     var matCon = g.add(settings.geometry, 'material', ['basic', 'lambert', 'phong', 'toon'])
     matCon.setValue(settings.geometry.material)    
     matCon.onChange(() => {
+        
         if (settings.geometry.material == 'basic') {
-            material = new THREE.MeshBasicMaterial({opacity:settings.geometry.opacity, transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
-            
+            material = new THREE.MeshBasicMaterial({opacity:settings.geometry.opacity, transparent: true, color: settings.geometry.color, 
+                side: THREE.DoubleSide, name: settings.geometry.material,
+                map: mesh.material.map})
+            if (textureGui != null)
+            {   g.remove(textureGui)
+                textureGui = null
+            }
         } else if (settings.geometry.material == 'lambert') {
-            material = new THREE.MeshLambertMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
+            material = new THREE.MeshLambertMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, 
+                side: THREE.DoubleSide, name: settings.geometry.material,
+                map: mesh.material.map,
+                bumpMap: mesh.material.map })
         } else if (settings.geometry.material == 'phong') {
-            material = new THREE.MeshPhongMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material })
+            material = new THREE.MeshPhongMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, 
+                side: THREE.DoubleSide, name: settings.geometry.material,
+                side: THREE.DoubleSide, name: settings.geometry.material,
+                map: mesh.material.map,
+                bumpMap: mesh.material.map })
         } else if (settings.geometry.material == 'toon') {
             const threeTone = textureLoader.load( '/assets/texture/gradientMap/threeTone.jpg' );
 			threeTone.minFilter = THREE.NearestFilter;
 			threeTone.magFilter = THREE.NearestFilter;
-            material = new THREE.MeshToonMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, side: THREE.DoubleSide, name: settings.geometry.material, gradientMap: threeTone })
+            material = new THREE.MeshToonMaterial({opacity:settings.geometry.opacity,transparent: true, color: settings.geometry.color, 
+                side: THREE.DoubleSide, name: settings.geometry.material, gradientMap: threeTone,
+                map: mesh.material.map,
+                bumpMap: mesh.material.map })
         } 
         mesh.material = material
+        if (mesh.material.name != 'basic' && textureGui == null)
+            initTextureGUI()
     })
     g.addColor(settings.geometry, 'color').onChange(() => {
         mesh.material.color.set(settings.geometry.color)
@@ -643,15 +660,22 @@ function initGeometryGUI()
         mesh.material.opacity = a
         
     })
+    g.add(mesh, 'castShadow')
 
+    g.add(mesh, 'receiveShadow')
     var obj = { Remove:function(){ removeObject() }};
     if (mesh.name != floor.name)
         {
             
             g.add(obj,'Remove');
         }
-    
+    if (mesh.material.name != 'basic')
+        initTextureGUI()
     g.open()
+}
+function initTextureGUI()
+{
+    textureGui = g.add(mesh.material, 'bumpScale', 0, 100)
 }
 function initGUI() {
     // gui  
@@ -706,14 +730,17 @@ function initGUI() {
 
     h.add(settings.common, 'floorLock').onChange(() => {
         if (settings.common.floorLock) {
-           
-            if (mesh.name==floor.name) {
-                if (g!=null)
-                        gui.removeFolder(g)
-                g = null
-                mesh = null
-                afControls.detach()
-            } 
+            if(mesh!=null)
+                {
+                    if (mesh.name==floor.name) {
+                        if (g!=null)
+                                gui.removeFolder(g)
+                        g = null
+                        mesh = null
+                        afControls.detach()
+                    } 
+                }
+            
             floor.name = 'inactive'
         } else {
             floor.name = '0'
@@ -824,3 +851,78 @@ function removeFromArray(index, oldArr)
     return newArr
 }
 
+//TEXTURE
+$("#textureList").on("click",".textureThumb", function() {
+    var src = this.getAttribute("src")
+    console.log(src)
+    loadTexture(src)
+});
+// $(".textureThumb").click(function () {
+
+//     var src = this.getAttribute("src")
+//     console.log(src)
+//     loadTexture(src)
+// })
+
+$("#gridTexture").click(function () {
+
+    if (mesh != null)
+        mesh.material.wireframe = true
+})
+document.addEventListener('DOMContentLoaded', () => {
+    const textureInput = document.getElementById('textureInput');
+    textureInput.addEventListener('change', handleTextureUpload);
+});
+document.getElementById('textureBtn').addEventListener('click', function(){
+    document.getElementById("textureInput").click();
+});
+
+var fileSrc = []
+function handleTextureUpload(event) {
+    if (event.target.files.length <= 0) return;
+    const file = event.target.files[0];
+    const name = file.name
+    //validate
+    var idxDot = name.lastIndexOf(".") + 1;
+    var extFile = name.substr(idxDot, name.length).toLowerCase();
+    if (extFile=="jpg" || extFile=="jpeg" || extFile=="png"){
+        var url = URL.createObjectURL(file)
+        fileSrc[fileSrc.length] = url
+        var iDiv = document.createElement('div');
+        iDiv.className = 'thumbnail';
+        document.getElementById('textureList').appendChild(iDiv);
+
+        var iImage = document.createElement('img');
+        iImage.className = "textureThumb"
+        iImage.src = url
+        iDiv.appendChild(iImage);
+        loadTexture(url)
+    }
+}
+
+function loadTexture(url)
+{
+        textureLoader.load(url, (texture) => {
+        if (mesh != null)
+        {
+            mesh.material.wireframe = false
+            mesh.material.map = texture; 
+            var maps = ['map']; 
+            if (mesh.material.name != 'basic')
+                {
+                    mesh.material.bumpMap = texture;
+                    maps = ['map', 'bumpMap']; 
+                }
+                
+            maps.forEach(function (mapName) {
+                var _texture = mesh.material[mapName]; 
+                _texture.wrapS = THREE. RepeatWrapping; 
+                _texture.wrapT = THREE.RepeatWrapping; 
+                _texture.minFilter = THREE.NearestFilter;
+                _texture.magFilter = THREE.LinearFilter;
+            });
+
+            
+        }
+    });
+}
