@@ -6,10 +6,13 @@ import { OrbitControls } from "three/examples/jsm/Addons.js"
 import { TransformControls } from "three/examples/jsm/Addons.js"
 import Stats from "three/examples/jsm/libs/stats.module.js"
 import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry.js"
+import TWEEN from '@tweenjs/tween.js';
 
 var objList = []
 var lightList = []
 var lightHelper = []
+var tweenList = new Array();
+var initialState = []
 // globale variables
 let camera, scene, renderer
 let floor, geometry, material, mesh, lightObj, axes
@@ -370,7 +373,6 @@ function getPointLight(intensity) {
         
     else if (lightObj.type == 'Spot Light' || lightObj.type == 'Directional Light')
     {   
-            console.log("df")
             lightObj.light.target.updateMatrixWorld();
     }
     lightObj.helper.update()
@@ -467,31 +469,20 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate)
+    for (let i = 0; i < objList.length; i++)
+        {
+
+            var name = objList[i].name
+            if (objList[i].name === 'inactive') name = 0;
+            if (tweenList[name] != null)
+                {
+                    tweenList[name].update();
+                }
+                
+        }
+        
     gui.updateDisplay();
     updateLookAt();
-    if (settings.animation.play) {
-        switch (settings.animation.type) {
-            case 'go up and down':
-                mesh.position.y = Math.sin(performance.now() * 0.001) * 0.5
-                break
-            case 'go left and right':
-                mesh.position.x = Math.sin(performance.now() * 0.001) * 0.5
-                break
-            case 'go forward and backward':
-                mesh.position.z = Math.sin(performance.now() * 0.001) * 0.5
-                break
-            case 'rotate':
-                mesh.rotation.y = performance.now() * 0.001
-                break
-            case 'go around':
-                mesh.position.x = Math.sin(performance.now() * 0.001) * 0.5
-                mesh.position.z = Math.cos(performance.now() * 0.001) * 0.5
-                break
-            default:
-                break
-        }
-    }
-
     stats.update()
     renderer.render(scene, camera)
 }
@@ -926,3 +917,348 @@ function loadTexture(url)
         }
     });
 }
+
+
+//ANIMATION
+
+
+function ani1(obj) {
+    const duration = 2000;
+    const targetY = obj.position.y + 2;
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) 
+        tweenList[obj.name] = new TWEEN.Group()
+    var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+    if (tweenIds.length === 0) {
+        var newObj = obj.clone()
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            newObj.geometry = obj.geometry.clone();
+            newObj.material = obj.material.clone();
+            initialState[obj.name] = newObj
+        }
+        initialState[obj.name] = newObj
+        
+        console.log("ameo")
+    }
+
+    let tween = new TWEEN.Tween(obj.position, tweenList[obj.name])
+        .to({ y: targetY }, duration)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .yoyo(true)
+        .repeat(Infinity)
+        .start();
+
+}
+
+function ani2(obj) {
+    const duration = 1000;
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) tweenList[obj.name] = new TWEEN.Group()
+        
+        var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            if (tweenIds.length === 0) {
+                var newObj = obj.clone()
+                newObj.geometry = obj.geometry.clone();
+                newObj.material = obj.material.clone();
+                initialState[obj.name] = newObj
+            }
+            initialState[obj.name] = newObj
+            
+            console.log("ameo")
+        }
+
+    let tween = new TWEEN.Tween(obj.rotation, tweenList[obj.name])
+        .to({ y: obj.rotation.y + Math.PI * 2 }, duration)
+        .easing(TWEEN.Easing.Linear.None)
+        .repeat(Infinity)
+        .start();
+
+}
+
+function ani3(obj) {
+    const duration = 1500;
+    const targetScale = obj.scale.clone().multiplyScalar(1.5);
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) tweenList[obj.name] = new TWEEN.Group()
+        var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+    if (tweenIds.length === 0) {
+        var newObj = obj.clone()
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            newObj.geometry = obj.geometry.clone();
+            newObj.material = obj.material.clone();
+            initialState[obj.name] = newObj
+        }
+        initialState[obj.name] = newObj
+        
+        console.log("ameo")
+    }
+
+    let tween = new TWEEN.Tween(obj.scale, tweenList[obj.name])
+        .to(targetScale, duration)
+        .easing(TWEEN.Easing.Elastic.InOut)
+        .yoyo(true)
+        .repeat(Infinity)
+        .start();
+ 
+}
+
+function ani4(obj) {
+    const duration = 5000;
+    const radius = 2;
+    const height = 4;
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) tweenList[obj.name] = new TWEEN.Group()
+        var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+    if (tweenIds.length === 0) {
+        var newObj = obj.clone()
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            newObj.geometry = obj.geometry.clone();
+            newObj.material = obj.material.clone();
+            initialState[obj.name] = newObj
+        }
+        initialState[obj.name] = newObj
+        
+        console.log("ameo")
+    }
+
+
+    let tween = new TWEEN.Tween({ t: 0 }, tweenList[obj.name])
+        .to({ t: 1 }, duration / 2)
+        .onUpdate(params => {
+            const t = params.t;
+            const angle = t * Math.PI * 4;
+            obj.position.x = radius * Math.cos(angle);
+            obj.position.y = t * height;
+            obj.position.z = radius * Math.sin(angle);
+        })
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .chain(
+            new TWEEN.Tween({ t: 1 })
+                .to({ t: 0 }, duration / 2)
+                .onUpdate(params => {
+                    const t = params.t;
+                    const angle = t * Math.PI * 4;
+                    obj.position.x = radius * Math.cos(angle);
+                    obj.position.y = t * height;
+                    obj.position.z = radius * Math.sin(angle);
+                })
+                .easing(TWEEN.Easing.Quadratic.InOut)
+        )
+        .repeat(Infinity)
+        .start();
+    
+}
+
+function ani5(obj) {
+    const duration = 2000;
+    const initialScale = obj.scale.clone();
+    const initialRotationY = obj.rotation.y;
+
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) tweenList[obj.name] = new TWEEN.Group()
+        var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+    if (tweenIds.length === 0) {
+        var newObj = obj.clone()
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            newObj.geometry = obj.geometry.clone();
+            newObj.material = obj.material.clone();
+            initialState[obj.name] = newObj
+        }
+        initialState[obj.name] = newObj
+        
+        console.log("ameo")
+    }
+
+
+    const spinAndShrinkTween = new TWEEN.Tween(obj, tweenList[obj.name])
+        .to({
+            rotation: { y: obj.rotation.y + Math.PI * 2 },
+            scale: { x: 0.1, y: 0.1, z: 0.1 },
+        }, duration / 2)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .chain(
+            new TWEEN.Tween(obj)
+                .to({
+                    rotation: { y: initialRotationY },
+                    scale: initialScale,
+                }, duration / 2)
+                .easing(TWEEN.Easing.Cubic.InOut)
+        )
+        .repeat(Infinity)
+        .start();
+    
+}
+
+
+function ani6(obj) {
+    const duration = 2000;
+    const initialColor = obj.material.color.clone();
+    const targetColor = new THREE.Color(0xff0000);
+
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) tweenList[obj.name] = new TWEEN.Group()
+        var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+    if (tweenIds.length === 0) {
+        var newObj = obj.clone()
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            newObj.geometry = obj.geometry.clone();
+            newObj.material = obj.material.clone();
+            initialState[obj.name] = newObj
+        }
+        initialState[obj.name] = newObj
+        
+        console.log("ameo")
+    }
+
+
+    const tween = new TWEEN.Tween(obj.material.color, tweenList[obj.name])
+        .to(targetColor, duration)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .yoyo(true)
+        .repeat(Infinity)
+        .start();
+
+    tween.onComplete(() => {
+        obj.material.color.copy(initialColor);
+    });
+}
+
+function ani7(obj) {
+    const duration = 2000;
+    const angle = Math.PI / 6;
+
+    const initialRotation = obj.rotation.clone();
+
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) tweenList[obj.name] = new TWEEN.Group()
+        var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+    if (tweenIds.length === 0) {
+        var newObj = obj.clone()
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            newObj.geometry = obj.geometry.clone();
+            newObj.material = obj.material.clone();
+            initialState[obj.name] = newObj
+        }
+        initialState[obj.name] = newObj
+        
+        console.log("ameo")
+    }
+
+    let tween = new TWEEN.Tween(obj.rotation, tweenList[obj.name])
+        .to({ z: angle }, duration / 2)
+        .easing(TWEEN.Easing.Cubic.InOut)
+        .yoyo(true)
+        .repeat(Infinity)
+        .onComplete(() => {
+            obj.rotation.copy(initialRotation);
+        })
+        .start();
+    
+}
+
+function ani8(obj) {
+    const duration = 3000;
+    const amplitude = 0.5;
+    const frequency = 2;
+
+    const initialVertices = obj.geometry.attributes.position.array.slice();
+
+    console.log(tweenList[obj.name])
+    if (tweenList[obj.name] == null) tweenList[obj.name] = new TWEEN.Group()
+        var tweenIds = Object.keys(tweenList[obj.name]._tweens);
+        if (tweenIds.length === 0) {
+            var newObj = obj.clone()
+            if (tweenIds.length === 0) {
+                var newObj = obj.clone()
+                newObj.geometry = obj.geometry.clone();
+                newObj.material = obj.material.clone();
+                initialState[obj.name] = newObj
+            }
+            initialState[obj.name] = newObj
+            
+            console.log("ameo")
+        }
+
+    let tween = new TWEEN.Tween({ t: 0 }, tweenList[obj.name])
+        .to({ t: 1 }, duration)
+        .onUpdate(params => {
+            const t = params.t;
+            for (let i = 0; i < obj.geometry.attributes.position.count; i++) {
+                const x = initialVertices[i * 3];
+                const y = initialVertices[i * 3 + 1];
+                const z = initialVertices[i * 3 + 2];
+
+                const newY = y + amplitude * Math.sin(frequency * (x + t * 2 * Math.PI));
+                obj.geometry.attributes.position.array[i * 3 + 1] = newY;
+            }
+            obj.geometry.attributes.position.needsUpdate = true;
+        })
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .repeat(Infinity)
+        .start();
+}
+
+function stopAnimation(obj) {
+    
+    tweenList[obj.name].removeAll()
+    console.log(initialState[obj.name])
+    
+    objList[obj.name] = initialState[obj.name]
+    scene.remove(mesh)
+
+    mesh = objList[obj.name]
+    scene.add(mesh)
+    afControls.attach(mesh)
+    initGeometryGUI(mesh)
+
+    if (mesh.name == '0')
+        floor = objList[obj.name]
+    //TWEEN.removeAll();
+}
+
+$(".controls-object button.animation").click(function () {
+    const animationValue = $(this).val();
+
+    if (mesh) {
+        switch (animationValue) {
+            case "ani1":
+                ani1(mesh);
+                break;
+            case "ani2":
+                ani2(mesh);
+                break;
+            case "ani3":
+                ani3(mesh);
+                break;
+            case "ani4":
+                ani4(mesh);
+                break;
+            case "ani5":
+                ani5(mesh);
+                break;
+            case "ani6":
+                ani6(mesh);
+                break;
+            case "ani7":
+                ani7(mesh);
+                break;
+            case "ani8":
+                ani8(mesh);
+                break;
+            case "noani": // No animation
+                stopAnimation(mesh);
+                break;
+            default:
+                console.warn("Unknown animation value:", animationValue);
+                break;
+        }
+    }
+});

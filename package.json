@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@tweenjs/tween.js": "^23.1.2",
     "dat.gui": "^0.7.9",
     "three": "^0.164.1"
   },

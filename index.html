@@ -60,7 +60,8 @@
         <div id="Controls">
             
             <div class="WebGL__controls">
-                <label style="color: aliceblue;"><b>TRANSFORM MODE</b></label>
+              <label style="color: aliceblue; cursor: pointer" data-toggle="collapse"  data-target="#controlDropdown" aria-controls="controlDropdown" aria-expanded="false" aria-label="Toggle navigation"><b>TRANSFORM CONTROL</b></label>
+              <div class="collapse" id="controlDropdown" data-parent="#Controls">
                 <div class="controls-object">
                     <button type="button" class="btn btn-primary mode" value="translate" style="background-color: purple; border: 0;">
                         <i class="fas fa-arrows-alt"></i>
@@ -79,6 +80,7 @@
                     </button>
                     <span class="controls-desc"> Scale </span>
                 </div>
+              </div>
             </div>
             <div class="WebGL__controls" style="margin-top: 10px;">
                 <label style="color: aliceblue; cursor: pointer" data-toggle="collapse"  data-target="#textureDropdown" aria-controls="textureDropdown" aria-expanded="false" aria-label="Toggle navigation"><b>TEXTURE</b></label>
@@ -129,29 +131,55 @@
             <div class="WebGL__controls" style="margin-top: 10px;">
                 <label style="color: aliceblue; cursor: pointer" data-toggle="collapse"  data-target="#aniDropdown" aria-controls="aniDropdown" aria-expanded="false" aria-label="Toggle navigation"><b>ANIMATION</b></label>
                 <div class="collapse" id="aniDropdown" data-parent="#Controls">
-                    <div class="controls-object">                   
-                        <button type="button" value = "ani1" class="btn btn-primary animation" style="background-color: purple; border: 0;">
-                            Animation 01
-                        </button>
-                        
-                    </div>
-                    <div class="controls-object">                   
-                        <button type="button" value = "ani2" class="btn btn-primary animation" style="background-color: purple; border: 0;">
-                            Animation 02
-                        </button>
-                    </div>
-                    <div class="controls-object">                   
-                        <button type="button" value = "ani3" class="btn btn-primary animation" style="background-color: purple; border: 0;">
-                            Animation 03
-                        </button>
-                    </div>
-
-                    <div class="controls-object">                   
-                        <button type="button" value = "noani" class="btn btn-primary animation" style="background-color: purple; border: 0;">
-                            No animation
-                        </button>
-                    </div>
+                  <div class="controls-object">                   
+                    <button type="button" value = "ani1" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Go UP-DOWN
+                    </button>
+                    
                 </div>
+                <div class="controls-object">                   
+                    <button type="button" value = "ani2" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Spinning (Y)
+                    </button>
+                </div>
+                <div class="controls-object">                   
+                    <button type="button" value = "ani3" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Zoom IN-OUT
+                    </button>
+                </div>
+                <div class="controls-object">                   
+                    <button type="button" value = "ani4" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Spiral
+                    </button>
+                    
+                </div>
+                <div class="controls-object">                   
+                    <button type="button" value = "ani5" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Spin and Shrink
+                    </button>
+                </div>
+                <div class="controls-object">                   
+                    <button type="button" value = "ani6" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Blink (RED)
+                    </button>
+                </div>
+                <div class="controls-object">                   
+                    <button type="button" value = "ani7" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Teeter-Totter
+                    </button>
+                </div>
+                <div class="controls-object">                   
+                    <button type="button" value = "ani8" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Waving
+                    </button>
+                </div>
+
+                <div class="controls-object">                   
+                    <button type="button" value = "noani" class="btn btn-primary animation" style="background-color: purple; border: 0;">
+                        Clear Animation
+                    </button>
+                </div>
+            </div>
                 
             </div>
         </div>
