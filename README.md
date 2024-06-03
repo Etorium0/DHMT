@@ -42,8 +42,7 @@ Có thể thêm nhiều object và sắp xếp nhiều nguồn sáng trong scene
 ## Các bước để chạy source code
 ### Cách 1: Sử dụng Visual Studio Code
 
-1. Cài đặt Visual Studio Code
-- Link: https://code.visualstudio.com/download
+1. Cài đặt Visual Studio Code: https://code.visualstudio.com/download
 
 2. Cài đặt NodeJs
 
