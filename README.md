@@ -43,7 +43,7 @@ Có thể thêm nhiều object và sắp xếp nhiều nguồn sáng trong scene
 ### Cách 1: Sử dụng Visual Studio Code
 
 1. Cài đặt Visual Studio Code
-Link: https://code.visualstudio.com/download
+- Link: https://code.visualstudio.com/download
 
 2. Cài đặt NodeJs
 
