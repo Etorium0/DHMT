@@ -40,7 +40,6 @@ Có thể thêm nhiều object và sắp xếp nhiều nguồn sáng trong scene
 - Animation có thể stack.
 
 ## Các bước để chạy source code
-### Cách 1: Sử dụng Visual Studio Code
 
 1. Cài đặt [Visual Studio Code](https://code.visualstudio.com/download)
 
@@ -49,8 +48,6 @@ Có thể thêm nhiều object và sắp xếp nhiều nguồn sáng trong scene
 3. Clone repository, mở bằng Visual Studio Code
 
 4. Tại Console, chạy dòng lệnh ```npm i``` để tải về các thư viện cần thiết, sau đó chạy dòng lệnh ```npx vite``` để mở Server
-
-### Cách 2: Truy cập trực tiếp tại [đây](https://huynhhuy1401.github.io/cs105-uit-final/)
 
 ### Demo: 
 - Drive: 
