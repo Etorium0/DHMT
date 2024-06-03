@@ -42,15 +42,15 @@ Có thể thêm nhiều object và sắp xếp nhiều nguồn sáng trong scene
 ## Các bước để chạy source code
 ### Cách 1: Sử dụng Visual Studio Code
 
-1. Cài đặt Visual Studio Code: https://code.visualstudio.com/download
+1. Cài đặt [Visual Studio Code](https://code.visualstudio.com/download)
 
-2. Cài đặt NodeJs
+2. Cài đặt [NodeJs](https://nodejs.org/en/download/package-manager)
 
 3. Clone repository, mở bằng Visual Studio Code
 
 4. Tại Console, chạy dòng lệnh ```npx vite``` để mở Server
 
-### Cách 2: Truy cập trực tiếp tại https://huynhhuy1401.github.io/cs105-uit-final/
+### Cách 2: Truy cập trực tiếp tại [đây](https://huynhhuy1401.github.io/cs105-uit-final/)
 
 ### Demo: 
 - Drive: 
