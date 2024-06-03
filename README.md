@@ -4,7 +4,7 @@ ScenePainter là một Webapp dựng cảnh và mô phỏng hình học 3D.
 ThS. Cáp Phạm Đình Thăng
 ## Nhóm thực hiện
 - Trần Nhật Khánh_2252
-- Lê Anh Khôi_2252
+- Đỗ Anh Khôi_22520695
 - Huỳnh Lê Đan Linh_22520759
 - Phạm Công Minh_2252
 
@@ -48,7 +48,7 @@ Có thể thêm nhiều object và sắp xếp nhiều nguồn sáng trong scene
 
 3. Clone repository, mở bằng Visual Studio Code
 
-4. Tại Console, chạy dòng lệnh ```npx vite``` để mở Server
+4. Tại Console, chạy dòng lệnh ```npm i``` để tải về các thư viện cần thiết, sau đó chạy dòng lệnh ```npx vite``` để mở Server
 
 ### Cách 2: Truy cập trực tiếp tại [đây](https://huynhhuy1401.github.io/cs105-uit-final/)
 
