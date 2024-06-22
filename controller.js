@@ -1282,7 +1282,7 @@ function stopAnimation(obj) {
     //TWEEN.removeAll();
 }
 
-$(".controls-object button.animation").click(function () {
+$(".controls-object button.animation").click(function chooseAnimation() {
     const animationValue = $(this).val();
 
     if (mesh) {
