@@ -7,6 +7,7 @@ import { TransformControls } from "three/examples/jsm/Addons.js"
 import Stats from "three/examples/jsm/libs/stats.module.js"
 import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry.js"
 import TWEEN from '@tweenjs/tween.js';
+import { GLTFLoader } from "three/examples/jsm/Addons.js"
 
 var objList = []
 var lightList = []
@@ -19,6 +20,7 @@ let floor, geometry, material, mesh, lightObj, axes
 let gui
 let stats
 let textureLoader = new THREE.TextureLoader()
+var objectLoader = new GLTFLoader()
 
 // controls 
 let obControls, afControls
@@ -112,17 +114,67 @@ $(".geometry").click(function () {
             case "Teapot":
                 geometry = new TeapotGeometry(0.5)
                 break
+            case "Dinosaur":
+                loadGLFT('./assets/models/dinosaur/scene.gltf', -90, 0, 0)
+                geometry = null
+                break;
+            case "Toilet Paper":
+                loadGLFT('./assets/models/simple_toilet_paper_2.0/scene.gltf', 90, 0, 0)
+                geometry = null
+                break;
         }
-        var mesh = new THREE.Mesh(geometry, material)
-        mesh.name = id++
-        mesh.castShadow = true // Shadow (đổ bóng).
-        mesh.receiveShadow = true
-        objList[objList.length] = mesh
-        scene.add(mesh)
+        if (geometry != null)
+            {
+                var mesh = new THREE.Mesh(geometry, material)
+                mesh.name = id++
+                mesh.castShadow = true // Shadow (đổ bóng).
+                objList[objList.length] = mesh
+                scene.add(mesh)
+            }
+        
 
         console.log(objList[objList.length-1].name)
 }
 )
+
+function loadGLFT(url, x = 0, y = 0, z = 0)
+{
+    objectLoader.load(
+        // resource URL
+	url,
+	// called when the resource is loaded
+	function ( gltf ) {
+        console.log(gltf)
+        gltf.scene.traverse( function ( object ) {
+
+            if ( object.isMesh )
+                {
+                    object.castShadow = true; // Shadow (đổ bóng).
+                    object.name = id++;
+                    object.rotation.x = THREE.MathUtils.degToRad(x);
+                    object.rotation.y = THREE.MathUtils.degToRad(y);
+                    object.rotation.z = THREE.MathUtils.degToRad(z);
+                    objList[objList.length] = object;
+                    scene.add(object)
+                }
+        } );
+
+
+	},
+	// called while loading is progressing
+	function ( xhr ) {
+
+		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+	},
+	// called when loading has errors
+	function ( error ) {
+
+		console.log( error );
+
+	}
+    )
+}
 $(".light").click(function () {
     var lightName = $(this).text()
     var val;
@@ -879,19 +931,25 @@ function handleTextureUpload(event) {
     if (extFile=="jpg" || extFile=="jpeg" || extFile=="png"){
         var url = URL.createObjectURL(file)
         fileSrc[fileSrc.length] = url
-        var iDiv = document.createElement('div');
-        iDiv.className = 'thumbnail';
-        document.getElementById('textureList').appendChild(iDiv);
-
-        var iImage = document.createElement('img');
-        iImage.className = "textureThumb"
-        iImage.src = url
-        iDiv.appendChild(iImage);
+        loadTextureToList(url)
         loadTexture(url)
     }
 }
 
-function loadTexture(url)
+function loadTextureToList(url)
+{
+    var iDiv = document.createElement('div');
+    iDiv.className = 'thumbnail';
+    document.getElementById('textureList').appendChild(iDiv);
+
+    var iImage = document.createElement('img');
+    iImage.className = "textureThumb"
+    iImage.src = url
+    iDiv.appendChild(iImage);
+    
+}
+
+function loadTexture(url, wrapS = THREE. RepeatWrapping, wrapT = THREE.RepeatWrapping, minFilter = THREE.NearestFilter, magFilter = THREE.LinearFilter)
 {
         textureLoader.load(url, (texture) => {
         if (mesh != null)
@@ -907,10 +965,10 @@ function loadTexture(url)
                 
             maps.forEach(function (mapName) {
                 var _texture = mesh.material[mapName]; 
-                _texture.wrapS = THREE. RepeatWrapping; 
-                _texture.wrapT = THREE.RepeatWrapping; 
-                _texture.minFilter = THREE.NearestFilter;
-                _texture.magFilter = THREE.LinearFilter;
+                _texture.wrapS = wrapS; 
+                _texture.wrapT = wrapT; 
+                _texture.minFilter = minFilter;
+                _texture.magFilter = magFilter;
             });
 
             
