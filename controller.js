@@ -71,7 +71,7 @@ let settings = {
     }
 }
 
-$(".mode").click(function () {
+$(".mode").click(function chooseTransformMode() {
     var mode = this.value
     console.log(mode)
     switch (mode) {
@@ -87,7 +87,7 @@ $(".mode").click(function () {
     }       
 })
 var id = 1
-$(".geometry").click(function () {
+$(".geometry").click(function chooseGeometry() {
     var geometryName = $(this).text()
     var geometry
     var material = new THREE.MeshBasicMaterial({transparent: true, color: 'white', side: THREE.DoubleSide, name: 'basic' })
@@ -175,7 +175,7 @@ function loadGLFT(url, x = 0, y = 0, z = 0)
 	}
     )
 }
-$(".light").click(function () {
+$(".light").click(function chooseLight() {
     var lightName = $(this).text()
     var val;
     console.log(lightName)
