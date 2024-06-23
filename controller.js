@@ -480,7 +480,7 @@ function init() {
     obControls.minDistance = 0.5
     obControls.maxDistance = 1000
     obControls.minPolarAngle = 0
-    obControls.maxPolarAngle = Math.PI / 2
+
 
     // affine controls
     afControls = new TransformControls(camera, renderer.domElement)
