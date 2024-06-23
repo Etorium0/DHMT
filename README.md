@@ -47,7 +47,7 @@ Có thể thêm nhiều object và sắp xếp nhiều nguồn sáng trong scene
 
 3. Clone repository, mở bằng Visual Studio Code
 
-4. Tại Console, chạy dòng lệnh ```npm i``` để tải về các thư viện cần thiết, sau đó chạy dòng lệnh ```npx vite``` để mở Server
+4. Tại Console, chạy dòng lệnh ```npm install``` để tải về các thư viện cần thiết, sau đó chạy dòng lệnh ```npx vite``` để mở Server
 
 ### Demo: 
 - Drive: 
