@@ -1,20 +1,18 @@
-Các bước để chạy source code
+[CS105] ScenePainter
+ScenePainter là một Webapp dựng cảnh và mô phỏng hình học 3D.
 
-Cách 1: Sử dụng Visual Studio Code
+-- Giảng viên hướng dẫn: ThS. Cáp Phạm Đình Thăng
+-- Nhóm thực hiện
+----Trần Nhật Khánh_22520655
+----Đỗ Anh Khôi_22520695
+----Huỳnh Lê Đan Linh_22520759
+----Phạm Công Minh_22520882
 
-1.Cài đặt Visual Studio Code
+-- Các bước để chạy source code
+B1: Cài đặt Visual Studio Code
+B2: Cài đặt NodeJs
+B3: Mở folder dự án trên Visual Studio Code
+B4: Chạy dòng lệnh npx install để tải các thư viện cần thiết
+B5: Chạy dòng lệnh npx vite để mở Server
 
-Link: https://code.visualstudio.com/download
-
-2.Cài đặt Live Sever extension
-
-3. Mở thư mục source-code bằng Visual Studio Code 
-(source-code được kèm sẵn trong file nộp hoặc có thể tải về từ đây https://github.com/huynhhuy1401/cs105-uit-final)
-
-4. Chọn file index.html và nhấn “Go Live” ở phía dưới góc phải màn hình để chạy web
-
-Cách 2: Truy cập trực tiếp tại https://huynhhuy1401.github.io/cs105-uit-final/
-
-Do video quá nặng không thể up lên course nên chúng em up lên google drive và có thể xem video demo ở link sau 
-https://drive.google.com/drive/folders/1FngiGTkFJ0IHYcZ4Dtdk3RnWEvyMR4zy?usp=sharing
-Nếu link trên không thể vào được có thể dùng link youtube sau để thay thế https://youtu.be/808TI-uiUpw
+--Git Repository: https://github.com/Etorium0/DHMT
