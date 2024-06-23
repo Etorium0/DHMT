@@ -3,10 +3,10 @@ ScenePainter là một Webapp dựng cảnh và mô phỏng hình học 3D.
 ## Giảng viên hướng dẫn
 ThS. Cáp Phạm Đình Thăng
 ## Nhóm thực hiện
-- Trần Nhật Khánh_2252
+- Trần Nhật Khánh_22520655
 - Đỗ Anh Khôi_22520695
 - Huỳnh Lê Đan Linh_22520759
-- Phạm Công Minh_2252
+- Phạm Công Minh_22520882
 
 ## Features
 ### Mesh & Light
